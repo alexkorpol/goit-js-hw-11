@@ -1,7 +1,7 @@
 import createGallery from '../templates/markup-gallery.hbs'
 // import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import axios from "axios";
-import debounce from 'lodash.debounce';
+// import axios from "axios";
+// import debounce from 'lodash.debounce';
 
 const DEBOUNCE_DELAY = 300;
 const DEBOUNCE_DELAY_NOTE_USER = 500;
