@@ -1,5 +1,5 @@
 import createGallery from '../templates/markup-gallery.hbs'
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+// import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import axios from "axios";
 import debounce from 'lodash.debounce';
 
