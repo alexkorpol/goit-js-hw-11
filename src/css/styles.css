@@ -2,6 +2,7 @@
   display: none;
 }
 
+
 * {
   box-sizing: border-box;
 }
@@ -242,4 +243,11 @@ label {
 
 .info-item:not(:first-child) {
   margin-left: 5px;
+}
+.btn-load-more button{
+  position:relative;
+display: flex;
+justify-content:center;
+width: 300px;
+left: 800px;
 }

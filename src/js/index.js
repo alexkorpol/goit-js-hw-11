@@ -33,12 +33,12 @@ const searchParams = new URLSearchParams({
   per_page: 40,
 });
 
-refs.inputEl.addEventListener("mouseover", debounce(noteUsers, DEBOUNCE_DELAY_NOTE_USER, {
+refs.inputEl.firstElementChild.addEventListener("mouseover", debounce(noteUsers, DEBOUNCE_DELAY_NOTE_USER, {
       leading: true,
       trailing: false,
 }));
 
-// !========== создание класса для SimpleLightbox (разбираться!!!)
+// !==== create object for SimpleLightbox ====
 let lightbox = new SimpleLightbox('.gallery__link', {
   captions: true,
   captionsData: 'alt',
@@ -49,13 +49,15 @@ refs.inputEl.addEventListener("submit", request);
 
 function request(event) {
   event.preventDefault();
+  // window.addEventListener('scroll', handleScroll);
+
   const {
     elements: { searchQuery }
   } = event.currentTarget;
   requestSearch = searchQuery.value.trim();
   refs.photoListEl.innerHTML = "";
   countPages = 1;
-  refs.buttonLoadMore.classList.add("load-more");
+  // refs.buttonLoadMore.classList.add("load-more");
 
   if (requestSearch === "") {
     console.log('The search string cannot be empty. Please specify your search query.');
@@ -67,7 +69,7 @@ function request(event) {
 
   searchPhoto()
 }
-
+// !==== Function for seek photo https://pixabay.com/api/
 async function searchPhoto(){
 try {
   const response = await getPhotoViaRequest();
@@ -81,30 +83,42 @@ try {
   if (totalHits === 0) {
     Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
     return
-      };
+  };
+
   createMarkup(hits);
 
   lightbox.refresh();
+  autoScroll();
 
   if (countPages === 1) {
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+  if (totalHits <= 40) {
+    console.log("Page ========>>>>>>>> ", 1);
+   noteUsersEndView();
+  };
   };
 
+  if (Math.ceil(totalHits / 40) > countPages) {
+    console.log(Math.ceil(totalHits / 40));
 
-  if (Math.ceil(totalHits / 40) > countPages ) {
-    countPages += 1;
-    console.log("выполнился первый if", countPages);
-    if (countPages === 2) {
-    console.log("выполнился второй if", countPages);
-    refs.buttonLoadMore.classList.remove("load-more");
-    refs.buttonLoadMore.addEventListener("click", searchPhoto);
+
+    if (countPages === 1) {
+      window.addEventListener('scroll', handleScroll)
     }
+    countPages += 1;
+    console.log("countPages:", countPages);
+    // console.log("выполнился первый if", countPages);
+    // if (countPages === 2) {
+    // console.log("выполнился второй if", countPages);
+    // refs.buttonLoadMore.classList.remove("load-more");
+    // refs.buttonLoadMore.addEventListener("click", searchPhoto);
+    // }
 
   } else {
-    refs.buttonLoadMore.classList.add("load-more");
-    refs.buttonLoadMore.removeEventListener("click", searchPhoto);
-    Notiflix.Notify.warning(
-    "We're sorry, but you've reached the end of search results.")
+    // refs.buttonLoadMore.classList.add("load-more");
+    // refs.buttonLoadMore.removeEventListener("click", searchPhoto);
+    window.removeEventListener('scroll', handleScroll);
+    noteUsersEndView();
   }
 } catch (err) {
 
@@ -112,22 +126,50 @@ try {
   }
 }
 
-// !========================== Functions =====================================
+// !========================== All functions =====================================
 
+// !==== Function get request for user
 function getPhotoViaRequest() {
   console.log("requestSearch:", requestSearch, "CountPage:", countPages);
   return axios.get(`${URL}?${searchParams}&q=${requestSearch}&page=${countPages}`)
 }
 
-
+// !==== Function create markup
 function createMarkup(array) {
   const markup = createGallery(array);
   refs.photoListEl.insertAdjacentHTML("beforeend", markup);
 }
-
+// !==== Function send note user ("Please enter keyword") =======
 function noteUsers(event) {
   console.log("event.target.value ===>>>>", event.target.value);
   if (event.target.value === "") {
     Notiflix.Notify.info('Please enter keyword for photos you are looking for')
   }
+}
+
+// !==== Function send note user ("reached the end") & clear of input ====
+function noteUsersEndView() {
+  Notiflix.Notify.warning(
+      "We're sorry, but you've reached the end of search results.");
+    refs.inputEl.firstElementChild.value = "";
+}
+
+// !==== Function for infinity scroll ====
+function handleScroll() {
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight - 5) {
+    searchPhoto();
+  }
+}
+
+// !==== Function for autoscroll screen ====
+function autoScroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
 }
