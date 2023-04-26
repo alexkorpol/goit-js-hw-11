@@ -9,8 +9,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   color: #212121;
-  background-color: #23a6d5;
-}
+  background-image:
+    url(../images/leather-green-texture.jpg);
+    }
 
 p {
   margin: 0;
@@ -197,15 +198,23 @@ label {
   left: 800px;
 }
 /* loader */
+.spinner {
+  position: fixed;
+  bottom: 0px;
+  left: 910px;
+}
+
+.hidden {
+  display: none;
+}
+
 .lds-spinner {
   color: official;
   display: inline-block;
   position: relative;
-  right: -1360px;
-  top: 5px;
   width: 80px;
   height: 80px;
-  /* display: none; */
+
 }
 .lds-spinner div {
   transform-origin: 40px 40px;

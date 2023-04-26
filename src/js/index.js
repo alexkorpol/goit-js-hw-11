@@ -9,7 +9,8 @@ const DEBOUNCE_DELAY_NOTE_USER = 500;
 const pixabayApi = new PixabayAPI();
 const refs = {
   inputEl: document.querySelector("#search-form"),
-  photoListEl: document.querySelector(".gallery")
+  photoListEl: document.querySelector(".gallery"),
+  loder: document.querySelector(".spinner")
 }
 
 // !==== create object for SimpleLightbox ====
@@ -62,6 +63,8 @@ try {
   };
 
   createMarkup(hits);
+
+  refs.loder.classList.add("hidden");
 
   lightbox.refresh();
   autoScroll();
@@ -142,6 +145,7 @@ Notiflix.Notify.failure("We're sorry, but we received error from server. Please 
 function handleScroll() {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
   if (scrollTop + clientHeight >= scrollHeight - 5) {
+    refs.loder.classList.remove("hidden");
     searchPhoto();
   }
 }
