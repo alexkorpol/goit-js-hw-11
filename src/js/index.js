@@ -44,7 +44,6 @@ function request(event) {
     searchEmpty();
     return;
   }
-
   searchPhoto();
   return;
 }
