@@ -1,28 +1,16 @@
+import { PixabayAPI } from './PixabayAPI';
 import createGallery from '../templates/markup-gallery.hbs';
 import Notiflix from 'notiflix';
-import axios from "axios";
 import debounce from 'lodash.debounce';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const DEBOUNCE_DELAY_NOTE_USER = 500;
-const URL = "https://pixabay.com/api/";
-let requestSearch = "";
-let countPages = 1;
-const per_page = 40;
-
+const pixabayApi = new PixabayAPI();
 const refs = {
   inputEl: document.querySelector("#search-form"),
   photoListEl: document.querySelector(".gallery")
 }
-
-const searchParams = new URLSearchParams({
-  key: "35599387-daff3be7791dba4aa3b1a02ca",
-  image_type: "photo",
-  orientation: "horizontal",
-  safesearch: true,
-  per_page: 40,
-});
 
 // !==== create object for SimpleLightbox ====
 
@@ -31,7 +19,7 @@ let lightbox = new SimpleLightbox('.gallery__link', {
   captionsData: 'alt',
   captionDelay: 250,
 });
-// !==== information
+// !==== information note for user ====
 refs.inputEl.firstElementChild.addEventListener("mouseover", debounce(noteUsers, DEBOUNCE_DELAY_NOTE_USER, {
       leading: true,
       trailing: false,
@@ -47,14 +35,13 @@ function request(event) {
   const {
     elements: { searchQuery }
   } = event.currentTarget;
-  requestSearch = searchQuery.value.trim();
+  pixabayApi.requestSearch = searchQuery.value.trim();
   refs.photoListEl.innerHTML = "";
-  countPages = 1;
 
-  if (requestSearch === "") {
-    Notiflix.Notify.failure(
-      'The search string cannot be empty. Please specify your search query.'
-    );
+  pixabayApi.resetPage();
+
+  if (pixabayApi.requestSearch === "") {
+    searchEmpty();
     return;
   }
 
@@ -67,11 +54,11 @@ function request(event) {
 async function searchPhoto() {
 
 try {
-  const response = await getPhotoViaRequest();
+  const response = await pixabayApi.getPhotoViaRequest();
   const { totalHits, hits } = response.data;
 
   if (totalHits === 0) {
-    Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+    noImagesFinded();
     return;
   };
 
@@ -80,24 +67,26 @@ try {
   lightbox.refresh();
   autoScroll();
 
-  if (countPages === 1) {
+
+  if (pixabayApi.countPages === 1) {
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
-
-  if (totalHits <= 40) {
-    noteUsersEndView();
-    return;
-  };
   };
 
-  if (Math.ceil(totalHits / per_page) > countPages) {
+  if (Math.ceil(totalHits / pixabayApi.per_page) > pixabayApi.countPages) {
 
-    if (countPages === 1) {
+    if (pixabayApi.countPages === 1) {
       window.addEventListener('scroll', handleScroll);
     }
-    countPages += 1;
+
+    pixabayApi.countPages += 1;
 
   } else {
-    if (Math.ceil(totalHits / per_page) - countPages === 0) {
+    if (totalHits <= 40) {
+      refs.inputEl.firstElementChild.value = "";
+      return;
+    }
+
+    if (Math.ceil(totalHits / pixabayApi.per_page) === pixabayApi.countPages) {
       window.removeEventListener('scroll', handleScroll);
       noteUsersEndView();
       return;
@@ -105,17 +94,11 @@ try {
   }
 
 } catch (err) {
-    console.log(err);
+    sendUserError();
   }
 }
 
 // !========================== All functions =====================================
-
-// !==== Function get request for user
-
-function getPhotoViaRequest() {
-  return axios.get(`${URL}?${searchParams}&q=${requestSearch}&page=${countPages}`)
-}
 
 // !==== Function create markup
 
@@ -131,12 +114,28 @@ function noteUsers(event) {
   }
 }
 
+// !==== Function search is empty ====
+function searchEmpty() {
+  Notiflix.Notify.failure('The search string cannot be empty. Please specify your search query.');
+}
+
+// !==== Function send user - no images & clear of input====
+function noImagesFinded() {
+  Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+  refs.inputEl.firstElementChild.value = "";
+}
+
 // !==== Function send note user ("reached the end") & clear of input ====
 
 function noteUsersEndView() {
   Notiflix.Notify.warning(
       "We're sorry, but you've reached the end of search results.");
     refs.inputEl.firstElementChild.value = "";
+}
+
+// !==== Function send to user about error ====
+function sendUserError() {
+Notiflix.Notify.failure("We're sorry, but we received error from server. Please try enter new keyword for photos.");
 }
 
 // !==== Function for infinity scroll ====
