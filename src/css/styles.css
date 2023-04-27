@@ -9,9 +9,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   color: #212121;
-  background-image:
-    url(../images/leather-green-texture.jpg);
-    }
+  background-image: url(../images/leather-green-texture.jpg);
+}
 
 p {
   margin: 0;
@@ -200,8 +199,10 @@ label {
 /* loader */
 .spinner {
   position: fixed;
-  bottom: 0px;
-  left: 910px;
+  bottom: -40px;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
 }
 
 .hidden {
@@ -214,7 +215,6 @@ label {
   position: relative;
   width: 80px;
   height: 80px;
-
 }
 .lds-spinner div {
   transform-origin: 40px 40px;

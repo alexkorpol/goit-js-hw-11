@@ -53,9 +53,11 @@ function request(event) {
 
 async function searchPhoto() {
 
-try {
-  const response = await pixabayApi.getPhotoViaRequest();
-  const { totalHits, hits } = response.data;
+  try {
+    refs.loder.classList.remove("hidden");
+    const response = await pixabayApi.getPhotoViaRequest();
+    refs.loder.classList.add("hidden");
+    const { totalHits, hits } = response.data;
 
   if (totalHits === 0) {
     noImagesFinded();
@@ -64,7 +66,7 @@ try {
 
   createMarkup(hits);
 
-  refs.loder.classList.add("hidden");
+
 
   lightbox.refresh();
   autoScroll();
@@ -145,7 +147,7 @@ Notiflix.Notify.failure("We're sorry, but we received error from server. Please 
 function handleScroll() {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
   if (scrollTop + clientHeight >= scrollHeight - 5) {
-    refs.loder.classList.remove("hidden");
+    // refs.loder.classList.remove("hidden");
     searchPhoto();
   }
 }
